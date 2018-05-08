@@ -37,6 +37,11 @@ class MyGame(arcade.Window):
         self.left_down = False
         self.start = True
         
+        self.canMoveLeft = True
+        self.canMoveRight = True
+        self.canMoveDown = True
+        self.canMoveUp = True
+        
         self.player_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
@@ -65,13 +70,16 @@ class MyGame(arcade.Window):
         self.R_pressed = False    
         
         self.speed = 3
+        
+        self.player.changeX = 0
+        self.player.changeY = 0
+        
         self.bullet_speed = 13
         
         counter = 0
         placing_sprites = True
         
         while placing_sprites:
-            print(counter)
             counter += 2
             tree = arcade.Sprite("tree.png", .5)
             tree.center_x = random.randrange(30,SCREEN_WIDTH-30)
@@ -117,23 +125,49 @@ class MyGame(arcade.Window):
         
     def update(self,dt):
         "move stuff"
+            
+        self.canMoveLeft = True
+        self.canMoveRight = True
+        self.canMoveDown = True
+        self.canMoveUp = True        
+        
         
         if self.W_pressed:
-            self.player.center_y += self.speed
-        if self.A_pressed:
-            self.player.center_x -= self.speed
+            self.player.changeY = self.speed
+        if self.A_pressed: 
+            self.player.changeX = -1 *self.speed
         if self.S_pressed:
-            self.player.center_y -= self.speed
+            self.player.changeY = -1 *self.speed
         if self.D_pressed:
-            self.player.center_x += self.speed
-            
+            self.player.changeX = self.speed
+           
         for bullet in self.bullet_list:
             bullet.center_x += math.cos(math.radians(bullet.angle + 90)) * self.bullet_speed
             bullet.center_y += math.sin(math.radians(bullet.angle + 90)) * self.bullet_speed
                 
             
-
+        hit_list = arcade.check_for_collision_with_list(self.player,self.environment_list)
         
+        for hit in hit_list:
+            print("hit")
+            if self.player.center_x > hit.center_x:
+                #self.canMoveLeft = False
+                self.player.center_x -= self.player.changeX
+                
+            if self.player.center_x < hit.center_x:
+                #self.canMoveRight = False
+                self.player.center_x -= self.player.changeX
+                
+            if self.player.center_y > hit.center_y:
+                #self.canMoveDown = False
+                self.player.center_y -= self.player.changeY
+                
+            if self.player.center_y < hit.center_y:
+                #self.canMoveUp = False     
+                self.player.center_y -= self.player.changeY
+                
+        self.player.center_x += self.player.changeX
+        self.player.center_y += self.player.changeY
 
     def on_mouse_motion(self,x,y,dx,dy):
         
@@ -151,7 +185,6 @@ class MyGame(arcade.Window):
         """
         self.mouseClick_x = x
         self.mouseClick_y = y
-        
         if button == arcade.MOUSE_BUTTON_LEFT:
             bullet = arcade.Sprite("bullet.png",.05)
             
@@ -166,32 +199,55 @@ class MyGame(arcade.Window):
             
             
     def on_key_press(self,key,modifiers):
-  
-        if key == arcade.key.W:
+
+        hit_list = arcade.check_for_collision_with_list(self.player,self.environment_list)
+        
+        for hit in hit_list:
+            if self.player.center_x > hit.center_x:
+                self.canMoveLeft = False
+                
+            if self.player.center_x < hit.center_x:
+                self.canMoveRight = False
+                
+            if self.player.center_y > hit.center_y:
+                self.canMoveDown = False
+                
+            if self.player.center_y < hit.center_y:
+                self.canMoveUp = False  
+                
+                
+        if key == arcade.key.W and self.canMoveUp:
             self.W_pressed = True
-        if key == arcade.key.A:
+        if key == arcade.key.A and self.canMoveLeft:
             self.A_pressed = True
-        if key == arcade.key.S:
+        if key == arcade.key.S and self.canMoveDown:
             self.S_pressed = True
-        if key == arcade.key.D:
+        if key == arcade.key.D and self.canMoveRight:
             self.D_pressed = True
         if key == arcade.key.R:
             self.R_pressed = True
             
             
     def on_key_release(self,key,modifiers):
-  
+        
         if key == arcade.key.W:
             self.W_pressed = False
+            self.player.changeY = 0
         if key == arcade.key.A:
             self.A_pressed = False
+            self.player.changeX = 0
+            
         if key == arcade.key.S:
             self.S_pressed = False
+            self.player.changeY = 0
+            
         if key == arcade.key.D:
             self.D_pressed = False
+            self.player.changeX = 0
+            
         if key == arcade.key.R:
             self.R_pressed = False      
-            
+         
 
     
     
