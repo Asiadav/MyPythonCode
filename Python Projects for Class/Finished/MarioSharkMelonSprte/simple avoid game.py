@@ -6,7 +6,6 @@ SCREEN_WIDTH = int(640)
 SCREEN_HEIGHT = int(480)
 
 
-
 class MyGame(arcade.Window):
       
     def __init__(self, width, height, title):
