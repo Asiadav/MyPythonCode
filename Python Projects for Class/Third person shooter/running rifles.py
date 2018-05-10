@@ -2,6 +2,8 @@ import arcade
 import random
 import time
 import math
+import winsound
+import os
 
 SCREEN_WIDTH = 800#1120
 SCREEN_HEIGHT = 600#630
@@ -42,18 +44,29 @@ class MyGame(arcade.Window):
         self.canMoveDown = True
         self.canMoveUp = True
         
+        self.sfx = False
     
         self.player_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
+        self.enemy_bullet_list = arcade.SpriteList()
         self.tree_list = arcade.SpriteList()
         self.crate_list = arcade.SpriteList()
+        self.background_list = arcade.SpriteList()
         
-        
+        for i in range(2):
+            
+            background = arcade.Sprite("background.jpg")
+            background.center_y = i * SCREEN_HEIGHT/3 
+            self.background_list.append(background)
+            
         
         self.player = arcade.Sprite("player.png",0.2)
         self.crosshair = arcade.Sprite("crosshair.png",0.1)   
+        self.enemy = arcade.Sprite("player.png", 0.2)
         
+        
+        self.enemy_list.append(self.enemy)
         
         self.player_list.append(self.player)
         self.player_list.append(self.crosshair)      
@@ -62,14 +75,19 @@ class MyGame(arcade.Window):
     def setup(self):
         "make start screen and restart variables"
         
-        self.player.center_x = SCREEN_WIDTH//2
-        self.player.center_y = SCREEN_HEIGHT//2
+        self.player.center_x = 20
+        self.player.center_y = 20
+        
+        self.enemy.center_x = SCREEN_WIDTH - 20
+        self.enemy.center_y = SCREEN_HEIGHT - 20
         
         self.W_pressed = False
         self.A_pressed = False
         self.S_pressed = False
         self.D_pressed = False
         self.R_pressed = False    
+        
+        self.player.prevAngle = 0
         
         self.speed = 3
         
@@ -82,7 +100,6 @@ class MyGame(arcade.Window):
         placing_sprites = True
         
         while placing_sprites:
-            print(counter)
             counter += 2
             tree = arcade.Sprite("tree.png", .5)
             tree.center_x = random.randrange(30,SCREEN_WIDTH-30)
@@ -134,21 +151,32 @@ class MyGame(arcade.Window):
             
             if counter >= 20:
                 placing_sprites = False
-     
+        if not(self.sfx):
+            playlist = ["danger.wav","waveshaper.wav"]
+            selection = playlist[random.randint(0,len(playlist)-1)]
+            winsound.PlaySound(selection, winsound.SND_ASYNC)
+
         while not(self.start):
             "run start screen"
         
     def on_draw(self):
-        arcade.start_render()
+        arcade.start_render()        
         
-        self.player_list.draw()
+        self.background_list.draw()
+        
+        
+        self.player_list.draw(),
         self.enemy_list.draw()
         self.bullet_list.draw()
         self.tree_list.draw()
         self.crate_list.draw()
         
         arcade.draw_triangle_filled(self.player.center_x, self.player.center_y + 30,self.player.center_x - 10, self.player.center_y + 40,self.player.center_x + 10, self.player.center_y + 40,arcade.color.RED)
-    
+        
+        arcade.draw_rectangle_filled(SCREEN_WIDTH//2,SCREEN_HEIGHT+20,SCREEN_WIDTH,40,arcade.color.WHITE)
+        
+    def enemy_action(self):
+        "what the enemy does"
         
     def update(self,dt):
         "move stuff"
@@ -173,15 +201,27 @@ class MyGame(arcade.Window):
             bullet.center_y += math.sin(math.radians(bullet.angle + 90)) * self.bullet_speed
             tree_hit_list = arcade.check_for_collision_with_list(bullet,self.tree_list)
             crate_hit_list = arcade.check_for_collision_with_list(bullet,self.crate_list)
-            player_hit_list = arcade.check_for_collision_with_list(bullet,self.player_list)
             enemy_hit_list = arcade.check_for_collision_with_list(bullet,self.enemy_list)
             if len(tree_hit_list) > 0:
-
                 bullet.kill()
             if len(crate_hit_list) > 0:
                 bullet.kill()
             if len(enemy_hit_list) > 0:
                 bullet.kill()
+                
+        for bullet in self.enemy_bullet_list:
+            bullet.center_x += math.cos(math.radians(bullet.angle + 90)) * self.bullet_speed
+            bullet.center_y += math.sin(math.radians(bullet.angle + 90)) * self.bullet_speed
+            tree_hit_list = arcade.check_for_collision_with_list(bullet,self.tree_list)
+            crate_hit_list = arcade.check_for_collision_with_list(bullet,self.crate_list)
+            player_hit_list = arcade.check_for_collision_with_list(bullet,self.player_list)
+            if len(tree_hit_list) > 0:
+                bullet.kill()
+            if len(crate_hit_list) > 0:
+                bullet.kill()
+            if len(player_hit_list) > 0:
+                bullet.kill()
+                
         self.player.center_x += self.player.changeX 
         crate_hit_list = arcade.check_for_collision_with_list(self.player,self.crate_list)
         tree_hit_list = arcade.check_for_collision_with_list(self.player,self.tree_list)
@@ -196,8 +236,11 @@ class MyGame(arcade.Window):
             self.canTurn = False
             self.player.center_y -= self.player.changeY       
     
-        
-        
+        if self.player.center_x < 15 or self.player.center_x > SCREEN_WIDTH-15:
+            self.player.center_x -= self.player.changeX
+        if self.player.center_y < 15 or self.player.center_y > SCREEN_HEIGHT-25:
+            self.player.center_y -= self.player.changeY
+            
     def on_mouse_motion(self,x,y,dx,dy):
         
         self.mousePos_x = x
@@ -212,20 +255,47 @@ class MyGame(arcade.Window):
                 crate_hit_list = arcade.check_for_collision_with_list(self.player,self.crate_list)
         tree_hit_list = arcade.check_for_collision_with_list(self.player,self.tree_list)
         if len(crate_hit_list) != 0 or len(tree_hit_list) != 0:
-            if -45<self.player.angle<45:
-                self.player.center_x -= 1
-            if 45<self.player.angle<135:
-                self.player.center_y -= 1
-            if 135<self.player.angle<225:
-                self.player.center_x += 1
-            if 225<self.player.angle<-45:
-                self.player.center_y += 1
+            if -360<self.player.angle<-315 or -45<self.player.angle<0:
+                self.player.center_x -= self.speed
+                
+                crate_hit_list = arcade.check_for_collision_with_list(self.player,self.crate_list)
+                tree_hit_list = arcade.check_for_collision_with_list(self.player,self.tree_list)
+                if len(crate_hit_list) != 0 or len(tree_hit_list) != 0:
+                    self.player.center_x += self.speed     
+                    
+            if -315<self.player.angle<-225:
+                self.player.center_y -= self.speed
+                
+                crate_hit_list = arcade.check_for_collision_with_list(self.player,self.crate_list)
+                tree_hit_list = arcade.check_for_collision_with_list(self.player,self.tree_list)
+                if len(crate_hit_list) != 0 or len(tree_hit_list) != 0:
+                    self.player.center_y += self.speed        
+                    
+            if -225<self.player.angle<-135:
+                self.player.center_x += self.speed
+                
+                crate_hit_list = arcade.check_for_collision_with_list(self.player,self.crate_list)
+                tree_hit_list = arcade.check_for_collision_with_list(self.player,self.tree_list)
+                if len(crate_hit_list) != 0 or len(tree_hit_list) != 0:
+                    self.player.center_x -= self.speed        
+                    
+            if -135<self.player.angle<-45:
+                self.player.center_y += self.speed
+                
+                crate_hit_list = arcade.check_for_collision_with_list(self.player,self.crate_list)
+                tree_hit_list = arcade.check_for_collision_with_list(self.player,self.tree_list)
+                if len(crate_hit_list) != 0 or len(tree_hit_list) != 0:
+                    self.player.center_y -= self.speed        
+                    
+            print(self.player.angle)
                 
             self.player.angle = self.player.prevAngle   
             
         else:
             self.player.angle = math.degrees(math.atan2((self.player.center_y - self.crosshair.center_y),(self.player.center_x - self.crosshair.center_x))) -180
             self.player.prevAngle = self.player.angle
+            print(self.player.angle)
+            
           
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -235,6 +305,9 @@ class MyGame(arcade.Window):
         self.mouseClick_y = y
         if button == arcade.MOUSE_BUTTON_LEFT:
             bullet = arcade.Sprite("bullet.png",.05)
+            
+            if self.sfx:
+                winsound.PlaySound("shot1.wav", winsound.SND_ASYNC)
             
             bullet.center_x = self.player.center_x - math.cos(math.radians(self.player.angle + 90)) * 12
             bullet.center_y = self.player.center_y - math.sin(math.radians(self.player.angle + 90)) * 12
