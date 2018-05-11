@@ -64,6 +64,9 @@ class MyGame(arcade.Window):
     def setup(self):
         "make start screen and restart variables"
         
+        self.won = False
+        self.lost = False
+        
         self.shot_time = 0
         self.enemy_shoot_time = 0
         
@@ -73,11 +76,16 @@ class MyGame(arcade.Window):
         self.enemy.center_x = SCREEN_WIDTH - 20
         self.enemy.center_y = SCREEN_HEIGHT - 20
         
+        self.enemy.prevX = 0
+        self.enemy.prevY = 0        
+        
         self.W_pressed = False
         self.A_pressed = False
         self.S_pressed = False
         self.D_pressed = False
         self.R_pressed = False    
+        
+        self.stuck_count = 0
         
         self.shooting = False
         
@@ -123,8 +131,8 @@ class MyGame(arcade.Window):
 
        
             crate = arcade.Sprite("crate.png", .1)
-            crate.center_x = random.randrange(40,SCREEN_WIDTH-40)
-            crate.center_y = random.randrange(40,SCREEN_HEIGHT-40)
+            crate.center_x = random.randrange(50,SCREEN_WIDTH-50)
+            crate.center_y = random.randrange(50,SCREEN_HEIGHT-50)
             self.crate_list.append(crate)
             
             for item in self.crate_list:
@@ -202,11 +210,16 @@ class MyGame(arcade.Window):
         if self.health <= 0:
             arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, SCREEN_WIDTH, SCREEN_HEIGHT + 80, arcade.color.BLACK)
             arcade.draw_text("You Lost",SCREEN_WIDTH//2 - 50, SCREEN_HEIGHT//2 + 30,arcade.color.WHITE,20)
+            if self.lost == False and self.won == False:
+                winsound.PlaySound("lose.wav", winsound.SND_ASYNC)
+            self.lost = True
             
         if self.enemy_health <= 0:
             arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, SCREEN_WIDTH, SCREEN_HEIGHT + 80, arcade.color.BLACK)
             arcade.draw_text("You Won",SCREEN_WIDTH//2 - 50, SCREEN_HEIGHT//2 + 30,arcade.color.WHITE,20)   
-            
+            if self.won == False and self.lost == False:
+                winsound.PlaySound("win1.wav", winsound.SND_ASYNC)
+            self.won = True
         
     def enemy_action(self):
         "what the enemy does" 
@@ -217,8 +230,8 @@ class MyGame(arcade.Window):
         if time.time()-self.turn_time> .5:
             "run once per time"
             self.turn_time = time.time()
-            self.enemy.changeX =  math.cos(math.radians(self.enemy.angle + random.randint(-45,45))) * 2
-            self.enemy.changeY = math.sin(math.radians(self.enemy.angle + random.randint(-45,45))) * 2
+            self.enemy.changeX =  math.cos(math.radians(self.enemy.angle + random.randint(-75,75))) * 2
+            self.enemy.changeY = math.sin(math.radians(self.enemy.angle + random.randint(-75,75))) * 2
 
         
         self.enemy.center_x += self.enemy.changeX 
@@ -234,6 +247,9 @@ class MyGame(arcade.Window):
         player_hit_list = arcade.check_for_collision_with_list(self.enemy,self.player_list)
         if len(crate_hit_list) != 0 or len(tree_hit_list) != 0 or len(player_hit_list) != 0:
             self.enemy.center_y -= self.enemy.changeY       
+            
+        if self.enemy.center_x == self.enemy.prevX and self.enemy.center_y == self.enemy.prevY:
+            self.stuck_count += 1
         
         if time.time() - self.raycast_time > 1/4:
             self.raycast_time = time.time()
@@ -262,12 +278,18 @@ class MyGame(arcade.Window):
               
             self.enemy_bullet_list.append(bullet)            
             self.shooting = False
+            
+        if self.stuck_count >= 10:
+            self.stuck_count = 0
+            self.enemy.center_x -= self.enemy.changeX
+            self.enemy.center_y -= self.enemy.changeY
         
+        self.enemy.prevX = self.enemy.center_x
+        self.enemy.prevY = self.enemy.center_y
         
     def update(self,dt):
         "move stuff"
-        print(len(self.enemy_bullet_list))
-        print(len(self.enemy_raycast))
+    
         
         
         self.canMoveLeft = True
@@ -313,8 +335,8 @@ class MyGame(arcade.Window):
                 bullet.kill()
                 
         for bullet in self.enemy_bullet_list:
-            bullet.center_x += math.cos(math.radians(bullet.angle + 90)) * self.bullet_speed
-            bullet.center_y += math.sin(math.radians(bullet.angle + 90)) * self.bullet_speed
+            bullet.center_x += math.cos(math.radians(bullet.angle + 90)) * self.bullet_speed *2
+            bullet.center_y += math.sin(math.radians(bullet.angle + 90)) * self.bullet_speed *2
             tree_hit_list = arcade.check_for_collision_with_list(bullet,self.tree_list)
             crate_hit_list = arcade.check_for_collision_with_list(bullet,self.crate_list)
             player_hit_list = arcade.check_for_collision_with_list(bullet,self.player_list)
