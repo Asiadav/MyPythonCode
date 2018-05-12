@@ -54,6 +54,9 @@ class MyGame(arcade.Window):
         self.crosshair = arcade.Sprite("crosshair.png",0.1)   
         self.enemy = arcade.Sprite("player.png", 0.2)
         
+        self.rip = arcade.Sprite("RIP.png", 0.2)
+        self.win = arcade.Sprite("medal.png", 0.5)
+        
         
         self.enemy_list.append(self.enemy)
         
@@ -115,9 +118,9 @@ class MyGame(arcade.Window):
         
         while placing_sprites:
             counter += 2
-            tree = arcade.Sprite("tree.png", .5)
-            tree.center_x = random.randrange(60,SCREEN_WIDTH-60)
-            tree.center_y = random.randrange(60,SCREEN_HEIGHT-60)
+            tree = arcade.Sprite("rock.png", .8)
+            tree.center_x = random.randrange(50,SCREEN_WIDTH-50)
+            tree.center_y = random.randrange(50,SCREEN_HEIGHT-50)
             self.tree_list.append(tree)
             
             for item in self.tree_list:
@@ -163,18 +166,21 @@ class MyGame(arcade.Window):
                 no_no.kill()
                 counter -= 1
             
-            if counter >= 15:
+            if counter >= 20:
                 placing_sprites = False
         if self.sfx:
             os.system("danger.mp3")
             
         if not(self.sfx):
-            playlist = ["danger.wav","waveshaper.wav"]
+            playlist = ["danger.wav","waveshaper.wav","danger2.wav","danger3.5.wav","hangem.wav","mine.wav","onlychance.wav","wisdomragew.wav"]
             selection = playlist[random.randint(0,len(playlist)-1)]
             winsound.PlaySound(selection, winsound.SND_ASYNC)
             
         while not(self.start):
-            "run start screen"
+            self.menu()
+            
+    def menu(self):
+        "run start screen"
         
     def on_draw(self):
         arcade.start_render()        
@@ -199,24 +205,33 @@ class MyGame(arcade.Window):
         
         arcade.draw_rectangle_filled(SCREEN_WIDTH//2,SCREEN_HEIGHT+20,SCREEN_WIDTH,40,arcade.color.WHITE)
         
-        arcade.draw_text(f"Health:{self.health: 2.0f}",25, SCREEN_HEIGHT +15,arcade.color.BLACK,15)        
-        arcade.draw_text(f"Clip:{self.clip: 2.0f}",125, SCREEN_HEIGHT +15,arcade.color.BLACK,15)        
+        arcade.draw_text(f"Health:{self.health: 2.0f}",25, SCREEN_HEIGHT +15,arcade.color.BLACK,15)
+        arcade.draw_rectangle_filled(120 + self.health * 4 , SCREEN_HEIGHT +20, self.health*8, 20, arcade.color.RED)
+        arcade.draw_rectangle_outline(160, SCREEN_HEIGHT +20, 80, 20, arcade.color.BLACK)
+        
+        arcade.draw_text(f"Clip:{self.clip: 2.0f}",250, SCREEN_HEIGHT +15,arcade.color.BLACK,15)        
     
         if self.reloading:      
             arcade.draw_text("Reloading",SCREEN_WIDTH//2 + 200, SCREEN_HEIGHT +15,arcade.color.BLACK,15)
-            arcade.draw_rectangle_outline(SCREEN_WIDTH//2 + 350, SCREEN_HEIGHT +20, 80, 20, arcade.color.BLACK)
-            arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 350, SCREEN_HEIGHT +20, self.reload_counter, 20, arcade.color.BLACK)
+            arcade.draw_rectangle_filled(self.crosshair.center_x + 20, self.crosshair.center_y, 10, 40, arcade.color.WHITE)
+            arcade.draw_rectangle_filled(self.crosshair.center_x + 20, self.crosshair.center_y + self.reload_counter / 4 - 20, 10, self.reload_counter/2, arcade.color.BLACK)
         
         if self.health <= 0:
             arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, SCREEN_WIDTH, SCREEN_HEIGHT + 80, arcade.color.BLACK)
             arcade.draw_text("You Lost",SCREEN_WIDTH//2 - 50, SCREEN_HEIGHT//2 + 30,arcade.color.WHITE,20)
+            self.rip.center_x = SCREEN_WIDTH//2
+            self.rip.center_y = SCREEN_HEIGHT//2 - 20
+            self.rip.draw()
             if self.lost == False and self.won == False:
                 winsound.PlaySound("lose.wav", winsound.SND_ASYNC)
             self.lost = True
             
         if self.enemy_health <= 0:
             arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, SCREEN_WIDTH, SCREEN_HEIGHT + 80, arcade.color.BLACK)
-            arcade.draw_text("You Won",SCREEN_WIDTH//2 - 50, SCREEN_HEIGHT//2 + 30,arcade.color.WHITE,20)   
+            arcade.draw_text("You Win",SCREEN_WIDTH//2 - 50, SCREEN_HEIGHT//2 + 30,arcade.color.WHITE,20) 
+            self.win.center_x = SCREEN_WIDTH//2 - 30
+            self.win.center_y = SCREEN_HEIGHT//2 - 40
+            self.win.draw()            
             if self.won == False and self.lost == False:
                 winsound.PlaySound("win1.wav", winsound.SND_ASYNC)
             self.won = True
