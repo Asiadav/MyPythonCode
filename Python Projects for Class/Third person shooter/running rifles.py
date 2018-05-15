@@ -77,7 +77,7 @@ class MyGame(arcade.Window):
         self.canMoveDown = True
         self.canMoveUp = True     
         self.left_down = False
-        self.clip = 20
+        self.clip = 10
         self.clip_full = self.clip
         """End"""
         
@@ -90,7 +90,7 @@ class MyGame(arcade.Window):
         self.enemy.prevX = 0
         self.enemy.prevY = 0          
         self.stuck_count = 0
-        self.enemy_health = 20        
+        self.enemy_health = 20    
         self.shooting = False
         self.raycast_time = 0
         self.turn_time = 0
@@ -99,7 +99,7 @@ class MyGame(arcade.Window):
         
         """Global Setup"""
         self.speed = 3
-        self.bullet_speed = 13      
+        self.bullet_speed = 18      
         self.won = False
         self.lost = False
         self.start = False
@@ -116,8 +116,8 @@ class MyGame(arcade.Window):
         while placing_sprites:
             counter += 2
             rock = arcade.Sprite("rock.png", .8)
-            rock.center_x = random.randrange(50,SCREEN_WIDTH-50)
-            rock.center_y = random.randrange(50,SCREEN_HEIGHT-50)
+            rock.center_x = random.randrange(60,SCREEN_WIDTH-60)
+            rock.center_y = random.randrange(60,SCREEN_HEIGHT-60)
             self.rock_list.append(rock)
             
             for item in self.rock_list:
@@ -130,8 +130,8 @@ class MyGame(arcade.Window):
 
        
             crate = arcade.Sprite("crate.png", .1)
-            crate.center_x = random.randrange(50,SCREEN_WIDTH-50)
-            crate.center_y = random.randrange(50,SCREEN_HEIGHT-50)
+            crate.center_x = random.randrange(60,SCREEN_WIDTH-60)
+            crate.center_y = random.randrange(60,SCREEN_HEIGHT-60)
             self.crate_list.append(crate)
             
             for item in self.crate_list:
@@ -252,6 +252,7 @@ class MyGame(arcade.Window):
                 arcade.draw_text("On",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,self.color1,20)
             else:
                 arcade.draw_text("Off",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,self.color1,20)
+                arcade.draw_text("(recommended)",SCREEN_WIDTH//2 + 160, SCREEN_HEIGHT//2 + 140,arcade.color.WHITE,12)
             
             self.gameExplain.draw()
             self.controls.draw()
@@ -266,7 +267,7 @@ class MyGame(arcade.Window):
         
         self.enemy.angle = math.degrees(math.atan2((self.enemy.center_y - self.player.center_y),(self.enemy.center_x - self.player.center_x))) - 180
         
-        if time.time()-self.turn_time> .5:
+        if time.time()-self.turn_time> 1:
             "run once per time"
             self.turn_time = time.time()
             self.enemy.changeX =  math.cos(math.radians(self.enemy.angle + random.randint(-75,75))) * 2
@@ -316,7 +317,7 @@ class MyGame(arcade.Window):
             self.enemy_bullet_list.append(bullet)            
             self.shooting = False
             
-        if self.stuck_count >= 1:
+        if self.stuck_count >= 3:
             self.stuck_count = 0
             self.enemy.center_x -= self.enemy.changeX
             self.enemy.center_y -= self.enemy.changeY
@@ -385,8 +386,8 @@ class MyGame(arcade.Window):
                     bullet.kill()
                     
             for bullet in self.enemy_bullet_list:
-                bullet.center_x += math.cos(math.radians(bullet.angle + 90)) * self.bullet_speed *2
-                bullet.center_y += math.sin(math.radians(bullet.angle + 90)) * self.bullet_speed *2
+                bullet.center_x += math.cos(math.radians(bullet.angle + 90)) * self.bullet_speed
+                bullet.center_y += math.sin(math.radians(bullet.angle + 90)) * self.bullet_speed 
                 rock_hit_list = arcade.check_for_collision_with_list(bullet,self.rock_list)
                 crate_hit_list = arcade.check_for_collision_with_list(bullet,self.crate_list)
                 player_hit_list = arcade.check_for_collision_with_list(bullet,self.player_list)
@@ -511,14 +512,14 @@ class MyGame(arcade.Window):
         self.mouseClick_x = x
         self.mouseClick_y = y
         
-        if self.onButton == 1 and button == arcade.MOUSE_BUTTON_LEFT:
+        if self.onButton == 1 and button == arcade.MOUSE_BUTTON_LEFT and self.start == False:
             self.set_mouse_visible(False)
             self.start = 1        
             if self.sfx:
                 playlist = ["danger.wav","waveshaper.wav","danger2.wav","danger3.5.wav","hangem.wav","mine.wav","onlychance.wav","wisdomrage.wav"]
                 selection = playlist[random.randint(0,len(playlist)-1)]                
                 os.system(selection)
-        if self.onButton == 2 and button == arcade.MOUSE_BUTTON_LEFT:
+        if self.onButton == 2 and button == arcade.MOUSE_BUTTON_LEFT and self.start == False:
             if self.sfx:
                 self.sfx = False
             else:
