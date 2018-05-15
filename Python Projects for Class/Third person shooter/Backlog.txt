@@ -1,0 +1,9 @@
+Backlog of features:
+-start menu
+-walking animation
+-bullet collision animation
+-block based ammo counter
+-class based enemy
+-premade map layouts
+-larger space
+-smarter enemy
