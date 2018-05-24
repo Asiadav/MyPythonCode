@@ -170,14 +170,15 @@ class MyGame(arcade.Window):
             
         if not(self.sfx):
             playlist = ["danger.wav","waveshaper.wav","danger2.wav","danger3.5.wav","hangem.wav","mine.wav","onlychance.wav","wisdomrage.wav"]
-            selection = playlist[random.randint(0,len(playlist)-1)]
-            winsound.PlaySound(selection, winsound.SND_ASYNC)
+            self.selection = playlist[random.randint(0,len(playlist)-1)]
+            winsound.PlaySound(self.selection, winsound.SND_ASYNC)
         """End"""
             
         """Menu Setup"""
         self.onButton = 1
         self.color1 = arcade.color.WHITE
-        self.color2 = arcade.color.BLACK        
+        self.color2 = arcade.color.BLACK   
+        self.color3 = arcade.color.BLACK
         """End"""
  
     def menu(self):
@@ -230,6 +231,8 @@ class MyGame(arcade.Window):
                 if self.lost == False and self.won == False:
                     winsound.PlaySound("lose.wav", winsound.SND_ASYNC)
                 self.lost = True
+                #self.start = False
+                
                 
             if self.enemy_health <= 0:
                 arcade.draw_rectangle_filled(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, SCREEN_WIDTH, SCREEN_HEIGHT + 80, arcade.color.BLACK)
@@ -239,20 +242,53 @@ class MyGame(arcade.Window):
                 self.win.draw()            
                 if self.won == False and self.lost == False:
                     winsound.PlaySound("win1.wav", winsound.SND_ASYNC)
-                self.won = True        
+                self.won = True  
+                #self.start = False
         else:
+            if self.onButton == 1:
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 220, 300, 40, arcade.color.WHITE)
+                arcade.draw_text("Start Game",SCREEN_WIDTH//2 + 160, SCREEN_HEIGHT//2 + 210,arcade.color.BLACK,20)
+                
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 180, 300, 40, arcade.color.BLACK)
+                arcade.draw_text("SFX",SCREEN_WIDTH//2 + 170, SCREEN_HEIGHT//2 + 170,arcade.color.WHITE,20)               
+                
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 140, 300, 40, arcade.color.BLACK)
+                arcade.draw_text("Play the only good song",SCREEN_WIDTH//2 + 100, SCREEN_HEIGHT//2 + 130,arcade.color.WHITE,20)   
+                if self.sfx:
+                    arcade.draw_text("On",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,arcade.color.WHITE,20)
+                else:
+                    arcade.draw_text("Off",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,arcade.color.WHITE,20)
+                    arcade.draw_text("(recommended)",SCREEN_WIDTH//2 + 380, SCREEN_HEIGHT//2 + 175,arcade.color.WHITE,12)                
+            if self.onButton == 2:
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 220, 300, 40, arcade.color.BLACK)
+                arcade.draw_text("Start Game",SCREEN_WIDTH//2 + 160, SCREEN_HEIGHT//2 + 210,arcade.color.WHITE,20)
+                
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 180, 300, 40, arcade.color.WHITE)
+                arcade.draw_text("SFX",SCREEN_WIDTH//2 + 170, SCREEN_HEIGHT//2 + 170,arcade.color.BLACK,20)               
+                
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 140, 300, 40, arcade.color.BLACK)
+                arcade.draw_text("Play the only good song",SCREEN_WIDTH//2 + 100, SCREEN_HEIGHT//2 + 130,arcade.color.WHITE,20) 
+                if self.sfx:
+                    arcade.draw_text("On",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,arcade.color.BLACK,20)
+                else:
+                    arcade.draw_text("Off",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,arcade.color.BLACK,20)
+                    arcade.draw_text("(recommended)",SCREEN_WIDTH//2 + 380, SCREEN_HEIGHT//2 + 175,arcade.color.WHITE,12)
+                    
+            if self.onButton == 3:
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 220, 300, 40, arcade.color.BLACK)
+                arcade.draw_text("Start Game",SCREEN_WIDTH//2 + 160, SCREEN_HEIGHT//2 + 210,arcade.color.WHITE,20)
+                
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 180, 300, 40, arcade.color.BLACK)
+                arcade.draw_text("SFX",SCREEN_WIDTH//2 + 170, SCREEN_HEIGHT//2 + 170,arcade.color.WHITE,20)               
+                
+                arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 140, 300, 40, arcade.color.WHITE)
+                arcade.draw_text("Play the only good song",SCREEN_WIDTH//2 + 100, SCREEN_HEIGHT//2 + 130,arcade.color.BLACK,20) 
             
-            arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 220, 300, 40, self.color1)
-            arcade.draw_text("Start Game",SCREEN_WIDTH//2 + 160, SCREEN_HEIGHT//2 + 210,self.color2,20)
-            
-            arcade.draw_rectangle_filled(SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 180, 300, 40, self.color2)
-            arcade.draw_text("SFX",SCREEN_WIDTH//2 + 170, SCREEN_HEIGHT//2 + 170,self.color1,20)
-            
-            if self.sfx:
-                arcade.draw_text("On",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,self.color1,20)
-            else:
-                arcade.draw_text("Off",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,self.color1,20)
-                arcade.draw_text("(recommended)",SCREEN_WIDTH//2 + 160, SCREEN_HEIGHT//2 + 140,arcade.color.WHITE,12)
+                if self.sfx:
+                    arcade.draw_text("On",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,arcade.color.WHITE,20)
+                else:
+                    arcade.draw_text("Off",SCREEN_WIDTH//2 + 220, SCREEN_HEIGHT//2 + 170,arcade.color.WHITE,20)
+                    arcade.draw_text("(recommended)",SCREEN_WIDTH//2 + 380, SCREEN_HEIGHT//2 + 175,arcade.color.WHITE,12)
             
             self.gameExplain.draw()
             self.controls.draw()
@@ -446,16 +482,23 @@ class MyGame(arcade.Window):
         self.mousePos_x = x
         self.mousePos_y = y
         
-        self.onButton = 0       
+        #self.onButton = 0       
         
         if SCREEN_WIDTH//2 + 40 < self.mousePos_x < SCREEN_WIDTH//2 + 400 and   SCREEN_HEIGHT//2 + 200 < self.mousePos_y < SCREEN_HEIGHT//2 + 240:
             self.onButton = 1
             self.color1 = arcade.color.WHITE
             self.color2 = arcade.color.BLACK
+            self.color3 = arcade.color.BLACK
         if SCREEN_WIDTH//2 + 40 < self.mousePos_x < SCREEN_WIDTH//2 + 400 and   SCREEN_HEIGHT//2 + 160 < self.mousePos_y < SCREEN_HEIGHT//2 + 200:
             self.onButton = 2
             self.color1 = arcade.color.BLACK
-            self.color2 = arcade.color.WHITE   
+            self.color2 = arcade.color.WHITE 
+            self.color3 = arcade.color.BLACK
+        if SCREEN_WIDTH//2 + 40 < self.mousePos_x < SCREEN_WIDTH//2 + 400 and   SCREEN_HEIGHT//2 + 120 < self.mousePos_y < SCREEN_HEIGHT//2 + 160:
+            self.onButton = 3
+            self.color1 = arcade.color.BLACK
+            self.color2 = arcade.color.BLACK 
+            self.color3 = arcade.color.WHITE
             
         if self.start:
             self.crosshair.center_x = self.mousePos_x 
@@ -524,7 +567,8 @@ class MyGame(arcade.Window):
                 self.sfx = False
             else:
                 self.sfx = True
-            
+        if self.onButton == 3 and button == arcade.MOUSE_BUTTON_LEFT and self.start == False:
+            winsound.PlaySound("onlychance.wav",winsound.SND_ASYNC)
         if button == arcade.MOUSE_BUTTON_LEFT and self.clip > 0 and time.time() - self.shot_time > 1/4 and self.start:
             self.shot_time = time.time()
             

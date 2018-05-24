@@ -95,7 +95,6 @@ class MyGame(arcade.Window):
             canMove = 1
             direction = [1,2,3,4]
             random.shuffle(direction)            
-            print("loop start")
             for i in range(0,4,1):
                 check = direction[i]
                 canMove = 1
@@ -106,14 +105,11 @@ class MyGame(arcade.Window):
                     self.y = self.current_position_y                    
                     self.x -= self.void_size
                     for block in self.block_list:
-                        print("self",self.x)
-                        print("block",block.x)
+             
                         if (self.x == block.x or self.x - self.void_size == block.x) and (self.y == block.y or self.y + self.void_size == block.y or self.y - self.void_size == block.y):
                             canMove = 0
-                            print("left stop")
                     for block in self.used_block_list:
-                        print("self",self.x)
-                        print("block",block.x)
+                 
                         if (self.x == block.x or self.x - self.void_size == block.x) and (self.y == block.y or self.y + self.void_size == block.y or self.y - self.void_size == block.y):
                             canMove = 0
                             print("left stop")
@@ -128,17 +124,13 @@ class MyGame(arcade.Window):
                     self.y = self.current_position_y                    
                     self.y += self.void_size
                     for block in self.block_list:
-                        print("self",self.y)
-                        print("block",block.y)                    
+                          
                         if (self.y == block.y or self.y + self.void_size == block.y) and (self.x == block.x or self.x + self.void_size == block.x or self.x - self.void_size == block.x):
                             canMove = 0            
-                            print("up stop")
                     for block in self.used_block_list:
-                        print("self",self.y)
-                        print("block",block.y)                    
+                     
                         if (self.y == block.y or self.y + self.void_size == block.y) and (self.x == block.x or self.x + self.void_size == block.x or self.x - self.void_size == block.x):
                             canMove = 0            
-                            print("up stop")
                 elif not(self.current_position_y + self.void_size < SCREEN_HEIGHT):
                     canMove = 0
     
@@ -148,17 +140,13 @@ class MyGame(arcade.Window):
                     self.y = self.current_position_y                    
                     self.x += self.void_size
                     for block in self.block_list:
-                        print("self",self.x)
-                        print("block",block.x)                    
+                              
                         if (self.x == block.x or self.x + self.void_size == block.x) and (self.y == block.y or self.y + self.void_size == block.y or self.y - self.void_size == block.y):
                             canMove = 0            
-                            print("right stop")
                     for block in self.used_block_list:
-                        print("self",self.x)
-                        print("block",block.x)                    
+                             
                         if (self.x == block.x or self.x + self.void_size == block.x) and (self.y == block.y or self.y + self.void_size == block.y or self.y - self.void_size == block.y):
                             canMove = 0            
-                            print("right stop")
                     
                 elif not( self.current_position_x + self.void_size < SCREEN_WIDTH):
                     canMove = 0
@@ -170,17 +158,13 @@ class MyGame(arcade.Window):
                     self.y = self.current_position_y                    
                     self.y -= self.void_size
                     for block in self.block_list:
-                        print("self",self.y)
-                        print("block",block.y)
+                  
                         if (self.y == block.y or self.y - self.void_size == block.y) and (self.x == block.x or self.x + self.void_size == block.x or self.x - self.void_size == block.x):
                             canMove = 0
-                            print("up stop")
                     for block in self.used_block_list:
-                        print("self",self.y)
-                        print("block",block.y)
+                 
                         if (self.y == block.y or self.y - self.void_size == block.y) and (self.x == block.x or self.x + self.void_size == block.x or self.x - self.void_size == block.x):
                             canMove = 0
-                            print("up stop")
                 elif not(self.current_position_y - self.void_size > 0):  
                     canMove = 0
                     
@@ -200,14 +184,12 @@ class MyGame(arcade.Window):
                 block = Block(self.current_position_x,self.current_position_y,self.size,self.color)
                 self.block_list.append(block)
                 self.counter = -1
-                print("\n\n",len(self.block_list),"\n\n")
                 
                 
             
             if canMove == 0:
                 #used = self.block_list.pop(len(self.block_list)-1)
                 #self.used_block_list.append(used)
-                print("baack")
                 try:
                     self.x = self.block_list[len(self.block_list)+self.counter].x
                     self.y = self.block_list[len(self.block_list)+self.counter].y

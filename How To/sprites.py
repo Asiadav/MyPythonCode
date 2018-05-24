@@ -5,7 +5,6 @@ COIN_COUNT = 50
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 400
 
-
 class MyGame(arcade.Window):
       
     def __init__(self, width, height, title):
