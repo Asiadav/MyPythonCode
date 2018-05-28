@@ -1,6 +1,2 @@
--Top UI
--active game explanations
 -lose rings when hurt
--score system
--start menu
 -boss
