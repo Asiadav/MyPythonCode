@@ -112,19 +112,19 @@ class MyGame(arcade.Window):
         self.menu_sprite_list = arcade.SpriteList()
         
         self.menu_button1 = arcade.Sprite("BR.png",0.2)
-        self.menu_button1.alpha = 0.8
+        self.menu_button1.alpha = 0.5
         self.menu_button1.center_x = SCREEN_WIDTH//2
         self.menu_button1.center_y = SCREEN_HEIGHT//2 + 150
         self.menu_sprite_list.append(self.menu_button1)        
         
         self.menu_button2 = arcade.Sprite("BR.png",0.2)
-        self.menu_button2.alpha = 0.8        
+        self.menu_button2.alpha = 0.5        
         self.menu_button2.center_x = SCREEN_WIDTH//2
         self.menu_button2.center_y = SCREEN_HEIGHT//2 +75
         self.menu_sprite_list.append(self.menu_button2)  
         
         self.menu_button3 = arcade.Sprite("BR.png",0.2)
-        self.menu_button3.alpha = 0.8        
+        self.menu_button3.alpha = 0.5        
         self.menu_button3.center_x = SCREEN_WIDTH//2
         self.menu_button3.center_y = SCREEN_HEIGHT//2 
         self.menu_sprite_list.append(self.menu_button3)          
@@ -195,15 +195,13 @@ class MyGame(arcade.Window):
         self.block_list.append(self.wall)
         self.block_list.append(self.wall2)
         
-        
-        
         #note to self: never use coordinate based sprite placing for large numbers of sprites. It is too tedious
         
         enemy_coords = [(60,300),(580,60),(375,200),(555,300),(700,60),(800,60),(900,60),(1000,400),(1420,290),(1450,60),(1800,60),(1900,60),(1800,510)]        
         for coord in enemy_coords:
             enemy = Enemy(coord[0],coord[1])         
             enemy.change_y = -4
-            enemy.change_x = random.uniform(0.5,2)
+            enemy.change_x = random.uniform(1,3)
             self.enemy_list.append(enemy)        
         ring_coords = [(60,200),(65,535),(220,535),(250,535),(280,535),(400,390),(585,290),(850,60),(880,60),(910,60),(950,400),(1330,290),(1440,60),(1700,200),(1870,60),(1810,60),(1965,510)]        
         for coord in ring_coords:
@@ -261,7 +259,6 @@ class MyGame(arcade.Window):
         self.immune = False
         self.score = 0
 
-        
         """Global Setup"""
         self.objective = False
         self.lost = False
@@ -279,22 +276,19 @@ class MyGame(arcade.Window):
         self.player.update_animation()
         self.enemy_list.update_animation()
         self.toggle = True
-        
+        self.scrolling = False
         self.enemy_killed = False
         
-       
         self.enemy_kill_start = 0
         """Obstacle Setup"""
         self.scroll = 0
-                
-                
+                   
         """SFX and Music Setup"""  
         
-        playlist = ['Africa.wav','Blue.wav','Centuries.wav','Despacito','Feeling','Give.wav','September.wav','Stop.wav','Take.wav','Under.wav','Warriors.wav','Wayward','Wicked']
+        playlist = ['Africa.wav','Blue.wav','Centuries.wav','Feeling.wav','September.wav','Stop.wav','Take.wav','Under.wav','Warriors.wav','Wayward.wav','Wicked.wav']
         randSelect = random.randint(0,(len(playlist)-1))
         self.selection = playlist[randSelect]        
-        
-        
+    
         winsound.PlaySound("Skyrim.wav", winsound.SND_ASYNC)
         
 
@@ -307,6 +301,10 @@ class MyGame(arcade.Window):
             self.taco.center_x += self.scroll
             self.background.draw()
             
+            if self.scrolling:
+                self.player.center_x += self.scroll
+                self.scrolling = False
+            
             for sprite in self.block_list:
                 sprite.center_x += self.scroll
             for sprite in self.spike_list:
@@ -316,8 +314,6 @@ class MyGame(arcade.Window):
             for sprite in self.enemy_list:
                 sprite.center_x += self.scroll
                 
-                
-            
             if self.immune and round(time.time() - self.immune_start,1) % 0.5 == 0:
                 self.player.alpha = 0.2
             elif self.immune:
@@ -325,7 +321,6 @@ class MyGame(arcade.Window):
                 
             if self.immune == False:
                 self.player.alpha = 1.0
-            
             
             self.scroll = 0
             self.taco.draw()
@@ -392,11 +387,10 @@ class MyGame(arcade.Window):
             arcade.draw_text("Useless Toggle: ",SCREEN_WIDTH//2 - 140, SCREEN_HEIGHT//2 - 10,arcade.color.WHITE,20)         
             
             if self.toggle:
-                arcade.draw_text("toggled",SCREEN_WIDTH//2 + 40, SCREEN_HEIGHT//2 - 10,arcade.color.WHITE,20)         
+                arcade.draw_text("toggled",SCREEN_WIDTH//2 + 40, SCREEN_HEIGHT//2 - 10,arcade.color.WHITE,20)  
             else:
                 arcade.draw_text("untoggled",SCREEN_WIDTH//2 + 40, SCREEN_HEIGHT//2 - 10,arcade.color.WHITE,20)         
                 
-            
             self.cursor.draw()
 
                 
@@ -411,13 +405,10 @@ class MyGame(arcade.Window):
                 enemy.change_x = -enemy.change_x
             enemy.center_y -= 5
             
-            
             block_hit_list = arcade.check_for_collision_with_list(enemy,self.enemy_list)
             if len(block_hit_list) != 0:    
                 enemy.change_x = -enemy.change_x
-                
-                
-
+ 
             enemy.center_y += enemy.change_y 
             block_hit_list = arcade.check_for_collision_with_list(enemy,self.block_list)
             if len(block_hit_list) != 0:
@@ -428,7 +419,7 @@ class MyGame(arcade.Window):
     
         if self.start:
             "Do whle game runs"
-            print(self.distance)
+            self.scroll = False
             
             if self.distance >= 2430:
                 self.objective = True
@@ -438,11 +429,11 @@ class MyGame(arcade.Window):
             
             if self.player.center_x < 200 and self.distance > 210:
                 self.scroll = self.speed
-                self.player.center_x += self.scroll    
+                self.scrolling = True                
                 
             if self.player.center_x > 3*SCREEN_WIDTH/5 and self.distance < 2230:
                 self.scroll = -self.speed
-                self.player.center_x += self.scroll
+                self.scrolling = True
             
             
             self.player.change_x = 0
@@ -521,7 +512,6 @@ class MyGame(arcade.Window):
                 for ring in ring_hit_list:
                     ring.kill()
                     self.score += 100
-                    self.score += 1
             
             self.enemy_action()
                 
@@ -545,28 +535,27 @@ class MyGame(arcade.Window):
             self.menu_sprite_list = arcade.SpriteList()
 
             self.menu_button1 = arcade.Sprite("BR.png",0.2)
-            self.menu_button1.alpha = 0.8
+            self.menu_button1.alpha = 0.5
             self.menu_button1.center_x = SCREEN_WIDTH//2
             self.menu_button1.center_y = SCREEN_HEIGHT//2 + 150
             self.menu_sprite_list.append(self.menu_button1)        
             
             self.menu_button2 = arcade.Sprite("BR.png",0.2)
-            self.menu_button2.alpha = 0.8        
+            self.menu_button2.alpha = 0.5        
             self.menu_button2.center_x = SCREEN_WIDTH//2
             self.menu_button2.center_y = SCREEN_HEIGHT//2 + 75
             self.menu_sprite_list.append(self.menu_button2)  
             
             self.menu_button3 = arcade.Sprite("BR.png",0.2)
-            self.menu_button3.alpha = 0.8        
+            self.menu_button3.alpha = 0.5        
             self.menu_button3.center_x = SCREEN_WIDTH//2
             self.menu_button3.center_y = SCREEN_HEIGHT//2 
             self.menu_sprite_list.append(self.menu_button3)  
             
             for box in self.menu_sprite_list:
                 if arcade.check_for_collision(self.cursor,box):
-                    print("heck")
                     newBox = arcade.Sprite("BR.png",0.25)
-                    newBox.alpha = 0.8
+                    newBox.alpha = 1
                     newBox.center_x = box.center_x
                     newBox.center_y = box.center_y
                     self.menu_sprite_list.append(newBox)
@@ -607,6 +596,8 @@ class MyGame(arcade.Window):
                     
             if self.button == 3:
                 self.toggle = not(self.toggle)
+                self.selection = 'Give.wav'
+                
                 
     def on_key_press(self,key,modifiers):
  
