@@ -113,6 +113,7 @@ class MyGame(arcade.Window):
         self.raycast()
         self.AA = False
         self.npc1_location = []
+        self.layer_list = []
         
     def raycast(self):
         
@@ -128,7 +129,12 @@ class MyGame(arcade.Window):
             draw_point[3] = SCREEN_WIDTH//4 + (self.camera.angle - draw_point[4]) * 6
       
             draw_point[4] = int(200 - draw_point[2])
-            arcade.draw_rectangle_filled(draw_point[3],SCREEN_HEIGHT//2, 1500/draw_point[2]*self.res, 25000 / draw_point[2], (draw_point[4] + 10,draw_point[4]+10,draw_point[4]+10))
+            
+            
+            #arcade.draw_rectangle_filled(draw_point[3],SCREEN_HEIGHT//2, 1500/draw_point[2]*self.res, 25000 / draw_point[2], (draw_point[4] + 10,draw_point[4]+10,draw_point[4]+10))
+            
+            self.layer_list.append((draw_point[2],draw_point[3],SCREEN_HEIGHT//2,1500/draw_point[2]*self.res,25000 / draw_point[2],(draw_point[4] + 10,draw_point[4]+10,draw_point[4]+10)))
+            
             #arcade.draw_rectangle_filled(drawX,SCREEN_HEIGHT//2, 15, 30000 / draw_point[2], arcade.color.BLACK)
         
         AA_list = []
@@ -167,8 +173,9 @@ class MyGame(arcade.Window):
             arcade.draw_polygon_filled(coord_tuple,(10,10,10))
             
 
-        self.draw_point_list = []
-            
+       
+        
+        
     def npc_draw(self):
         self.npc1_sprite.center_x = -50
         if len(self.npc1_location) != 0:
@@ -185,13 +192,25 @@ class MyGame(arcade.Window):
         arcade.draw_rectangle_filled(850,210,600,200,arcade.color.BROWN)
         arcade.draw_rectangle_filled(850,390,600,180,arcade.color.DARK_BROWN)
         
-        self.draw_3d()
-        self.npc_draw()
+        #add the npc to the list, and give npc distance
+        #optimize
+        #basically works
         
+        self.layer_list.sort()
+        for i in range(len(self.layer_list)-1,0,-1):
+            arcade.draw_rectangle_filled(self.layer_list[i][1],self.layer_list[i][2],self.layer_list[i][3],self.layer_list[i][4],self.layer_list[i][5])
+        self.layer_list = []            
+
+        self.draw_3d()
+        '''
+        self.npc_draw()
+        '''
         self.npc1.draw()
         self.wall_list.draw()
         self.camera.draw()
-        #self.rayCast_list.draw()
+        self.rayCast_list.draw()
+        
+        self.draw_point_list = []
         
         arcade.draw_rectangle_outline(850,300,600,380,arcade.color.GRAY, 100)
         
