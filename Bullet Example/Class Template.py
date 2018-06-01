@@ -31,6 +31,8 @@ class MyGame(arcade.Window):
     def on_draw(self):
         arcade.start_render()        
         self.all_sprites_list.draw()
+        #coord_list = ((10,50),(50,10),(10,10),(100,20))
+        #arcade.draw_polygon_outline(coord_list,arcade.color.BLACK)
         
     def update(self,dt):
         "update"

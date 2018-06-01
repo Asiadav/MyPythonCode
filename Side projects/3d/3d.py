@@ -41,7 +41,7 @@ class MyGame(arcade.Window):
         self.wall_list.append(self.wall2)
         
         self.wall2 = arcade.Sprite("BR.png",0.08)
-        self.wall2.center_x = 210
+        self.wall2.center_x = 320
         self.wall2.center_y = 225
         self.wall2.angle = 0
         self.wall_list.append(self.wall2)        
@@ -75,18 +75,28 @@ class MyGame(arcade.Window):
         self.wall2.center_y = 175
         self.wall2.angle = 90
         self.wall_list.append(self.wall2)        
-        '''
-        coord_list = [(10,10),(60,10),(110,10),(160,10),(10,60),(10,110),(10,160),(60,160),(110,160),(160,160),(160,60),(160,110)] 
-                             
-        for coord in coord_list:
-            wall = arcade.Sprite("circle.png",.03)
+        
+        wall_coord_list = [(135,300,90),(370,300,90),(320,350,0),(60,350,0),(10,425,90),(135,425,90),(10,525,90),(60,600,0),(180,600,0),(300,600,0),(375,540,90),(375,420,90)]
+        
+        for coord in wall_coord_list:
+            wall = arcade.Sprite("BR.png",0.08)
             wall.center_x = coord[0]
             wall.center_y = coord[1]
-            self.wall_list.append(wall)
-        '''
+            wall.angle = coord[2]
+            self.wall_list.append(wall)            
+
+        self.npc1 = arcade.Sprite("circle.png",0.05)
+        self.npc1.center_x = 310
+        self.npc1.center_y = 285
+        
+        self.npc1_sprite = arcade.Sprite("Dragon.png",0.3)
+        self.npc1_sprite.center_y = SCREEN_HEIGHT//2
+        self.npc1_sprite.center_x = -50
+        
         self.camera = arcade.Sprite("Triangle.png",0.01)
         self.camera.center_x = 85
         self.camera.center_y = 85
+        self.camera.angle = 0
         
         self.rayCast_list = arcade.SpriteList()
         
@@ -100,73 +110,90 @@ class MyGame(arcade.Window):
         
         self.res = 5
         
+        self.raycast()
+        self.AA = False
+        self.npc1_location = []
+        
     def raycast(self):
         
         for i in range(-45,45,self.res):
-            ray = arcade.Sprite("circle.png",0.01)
+            ray = arcade.Sprite("circle.png",0.005)
             ray.angle = i + self.camera.angle - 90
             ray.center_x = self.camera.center_x
             ray.center_y = self.camera.center_y
             self.rayCast_list.append(ray)
-        
+            
     def draw_3d(self):
-    
         for draw_point in self.draw_point_list:
-            draw_point[3] = SCREEN_WIDTH//8 + (self.camera.angle - draw_point[3]) * 6
+            draw_point[3] = SCREEN_WIDTH//4 + (self.camera.angle - draw_point[4]) * 6
       
             draw_point[4] = int(200 - draw_point[2])
-            arcade.draw_rectangle_filled(draw_point[3],SCREEN_HEIGHT//2, 1500/draw_point[2]*self.res, 20000 / draw_point[2], (draw_point[4],draw_point[4],draw_point[4],))
+            arcade.draw_rectangle_filled(draw_point[3],SCREEN_HEIGHT//2, 1500/draw_point[2]*self.res, 25000 / draw_point[2], (draw_point[4] + 10,draw_point[4]+10,draw_point[4]+10))
             #arcade.draw_rectangle_filled(drawX,SCREEN_HEIGHT//2, 15, 30000 / draw_point[2], arcade.color.BLACK)
         
         AA_list = []
-        for i in range(len(self.draw_point_list)-1):
-            print("comparing:", self.draw_point_list[i][2])
-            print("to:", self.draw_point_list[i + 1][2])
-            
-            if -10 < self.draw_point_list[i][0] - self.draw_point_list[i + 1][0] < 10 and -30 < self.draw_point_list[i][1] - self.draw_point_list[i + 1][1] < 30 and -40 < self.draw_point_list[i][3] - self.draw_point_list[i + 1][3] < 40:
-                arcade.draw_rectangle_filled((self.draw_point_list[i][3] + self.draw_point_list[i+1][3])/2,SCREEN_HEIGHT//2, (1500/self.draw_point_list[i][2]*self.res + 1500/self.draw_point_list[i][2]*self.res)/2, (20000 / self.draw_point_list[i][2] + 20000/self.draw_point_list[i][2])/2, arcade.color.RED)
-                
-                x = (self.draw_point_list[i][3] + self.draw_point_list[i+1][3])/2 - (1500/self.draw_point_list[i][2]*self.res + 1500/self.draw_point_list[i][2]*self.res)/4
-                
-                y = (20000 / self.draw_point_list[i][2] + 20000/self.draw_point_list[i][2])/4
-                
-                AA_list.append((x,y))
-
-                
-            elif -10 < self.draw_point_list[i][1] - self.draw_point_list[i + 1][1] < 10 and -30 < self.draw_point_list[i][0] - self.draw_point_list[i + 1][0] < 30 and -40 < self.draw_point_list[i][3] - self.draw_point_list[i + 1][3] < 40:
-                arcade.draw_rectangle_filled((self.draw_point_list[i][3] + self.draw_point_list[i+1][3])/2,SCREEN_HEIGHT//2, (1500/self.draw_point_list[i][2]*self.res + 1500/self.draw_point_list[i][2]*self.res)/2, (20000 / self.draw_point_list[i][2] + 20000/self.draw_point_list[i][2])/2, arcade.color.RED)  
-                
-                x = (self.draw_point_list[i][3] + self.draw_point_list[i+1][3])/2 - (1500/self.draw_point_list[i][2]*self.res + 1500/self.draw_point_list[i][2]*self.res)/4
-                
-                y = (20000 / self.draw_point_list[i][2] + 20000/self.draw_point_list[i][2])/4
-                
-                AA_list.append((x,y))
-              
-                
-                #(self.draw_point_list[i][4],self.draw_point_list[i][4],self.draw_point_list[i][4]))   
+        if self.AA:
+            for i in range(len(self.draw_point_list)-1):
+        
+                if -5 < self.draw_point_list[i][0] - self.draw_point_list[i + 1][0] < 5 and -20 < self.draw_point_list[i][1] - self.draw_point_list[i + 1][1] < 20 and -10 < self.draw_point_list[i][4] - self.draw_point_list[i + 1][4] < 10:
+                    arcade.draw_rectangle_filled((self.draw_point_list[i][3] + self.draw_point_list[i+1][3])/2,SCREEN_HEIGHT//2, (1400/self.draw_point_list[i][2]*self.res + 1500/self.draw_point_list[i][2]*self.res)/2, (20000 / self.draw_point_list[i][2] + 20000/self.draw_point_list[i][2])/2, arcade.color.RED)
+        
+                    x = (self.draw_point_list[i][3] + self.draw_point_list[i+1][3])/2
+        
+                    y = (20000 / self.draw_point_list[i][2] + 20000/self.draw_point_list[i][2])/3
+        
+                    AA_list.append((x,y))
+        
+        
+                elif -5 < self.draw_point_list[i][1] - self.draw_point_list[i + 1][1] < 5 and -20 < self.draw_point_list[i][0] - self.draw_point_list[i + 1][0] < 20 and -10 < self.draw_point_list[i][4] - self.draw_point_list[i + 1][4] < 10:
+                    arcade.draw_rectangle_filled((self.draw_point_list[i][3] + self.draw_point_list[i+1][3])/2,SCREEN_HEIGHT//2, (1500/self.draw_point_list[i][2]*self.res + 1500/self.draw_point_list[i][2]*self.res)/2, (20000 / self.draw_point_list[i][2] + 20000/self.draw_point_list[i][2])/2, arcade.color.RED)  
+        
+                    x = (self.draw_point_list[i][3] + self.draw_point_list[i+1][3])/2
+                    y = (20000 / self.draw_point_list[i][2] + 20000/self.draw_point_list[i][2])/3
+        
+                    AA_list.append((x,y))
+        
+                if abs(self.draw_point_list[i][0] - self.draw_point_list[i + 1][0]) < 10 and abs(self.draw_point_list[i][1] - self.draw_point_list[i + 1][1]) < 10 and abs(self.draw_point_list[i][0] - self.draw_point_list[i - 1][0]) < 10 and abs(self.draw_point_list[i][1] - self.draw_point_list[i - 1][1]) < 10:
+        
+                    arcade.draw_rectangle_filled(self.draw_point_list[i][3],SCREEN_HEIGHT//2, 1500/self.draw_point_list[i][2]*self.res, 20000 / self.draw_point_list[i][2], arcade.color.BLUE)
+        
+                    #(self.draw_point_list[i][4],self.draw_point_list[i][4],self.draw_point_list[i][4]))           
         
         AA_list.sort()
 
-        if len(AA_list) > 1:
-            coord_tuple = ((AA_list[0][0], SCREEN_HEIGHT//2 + AA_list[0][1]) , (AA_list[0][0], SCREEN_HEIGHT//2 - AA_list[0][1]) , (AA_list[0][0], SCREEN_HEIGHT//2 + AA_list[len(AA_list)-1][1]) , (AA_list[len(AA_list)-1][0], SCREEN_HEIGHT//2 - AA_list[len(AA_list)-1][1]))
+        if len(AA_list) > 1 and self.AA:
+       
+            coord_tuple = ((AA_list[0][0], SCREEN_HEIGHT//2 + AA_list[0][1]) , (AA_list[0][0], SCREEN_HEIGHT//2 - AA_list[0][1]) , (AA_list[len(AA_list)-1][0], SCREEN_HEIGHT//2 - AA_list[len(AA_list)-1][1]) , (AA_list[len(AA_list)-1][0], SCREEN_HEIGHT//2 + AA_list[len(AA_list)-1][1]))
             arcade.draw_polygon_filled(coord_tuple,(10,10,10))
-                
-        self.draw_point_list = []
+            
 
+        self.draw_point_list = []
+            
+    def npc_draw(self):
+        self.npc1_sprite.center_x = -50
+        if len(self.npc1_location) != 0:
+            self.npc1_sprite.center_x = sum(self.npc1_location)/len(self.npc1_location)
+            self.npc1_sprite.draw()
+            self.npc1_location = []
+    
+        
+        
         
     def on_draw(self):
         arcade.start_render()  
         
-        arcade.draw_rectangle_filled(700,210,600,200,arcade.color.BROWN)
-        arcade.draw_rectangle_filled(700,390,600,180,arcade.color.DARK_BROWN)
+        arcade.draw_rectangle_filled(850,210,600,200,arcade.color.BROWN)
+        arcade.draw_rectangle_filled(850,390,600,180,arcade.color.DARK_BROWN)
         
         self.draw_3d()
+        self.npc_draw()
         
+        self.npc1.draw()
         self.wall_list.draw()
         self.camera.draw()
-        self.rayCast_list.draw()
+        #self.rayCast_list.draw()
         
-        arcade.draw_rectangle_outline(700,300,600,380,arcade.color.GRAY, 100)
+        arcade.draw_rectangle_outline(850,300,600,380,arcade.color.GRAY, 100)
         
         
         
@@ -176,15 +203,24 @@ class MyGame(arcade.Window):
         if time.time() - self.raycast_start > 0.01:
             self.raycast_start = time.time()
             self.raycast()
-        
+        '''
+        if len(self.rayCast_list) == 0:
+            self.raycast_start = time.time()
+            
+            self.raycast()
+        '''    
         for ray in self.rayCast_list:
             ray.center_x += math.cos(math.radians(ray.angle)) * 10
             ray.center_y += math.sin(math.radians(ray.angle)) * 10
             cast_hit_list = arcade.check_for_collision_with_list(ray,self.wall_list)
             if len(cast_hit_list) != 0:
-                draw_point = [ray.center_x,ray.center_y,math.sqrt((ray.center_x-self.camera.center_x) ** 2 + (ray.center_y-self.camera.center_y) ** 2),ray.angle,0,0]
+                draw_point = [ray.center_x,ray.center_y,math.sqrt((ray.center_x-self.camera.center_x) ** 2 + (ray.center_y-self.camera.center_y) ** 2),ray.angle,ray.angle,0]
                 self.draw_point_list.append(draw_point)
                 ray.kill()
+            npc_hit_list = arcade.check_for_collision(ray,self.npc1)
+            if npc_hit_list and math.sqrt((ray.center_x-self.camera.center_x) ** 2 + (ray.center_y-self.camera.center_y) ** 2) < 80:
+                npc_pos = SCREEN_WIDTH//4 + (self.camera.angle - ray.angle) * 6
+                self.npc1_location.append(npc_pos)
         
         
         if self.W_pressed:
@@ -256,7 +292,12 @@ class MyGame(arcade.Window):
         
         #self.rayCast_list = arcade.SpriteList()
         self.camera.angle -= dx / 1.5
-        
+        '''
+        if self.camera.angle > 360:
+            self.camera.angle = 0
+        elif self.camera.angle < 0:
+            self.camera.angle = 360
+        '''
         #self.camera.angle = math.degrees(math.atan2((self.camera.center_y - y),(self.camera.center_x - x))) -90          
         
 def main():
