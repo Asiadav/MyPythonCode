@@ -27,75 +27,29 @@ class MyGame(arcade.Window):
     def setup(self):
         
         self.wall_list = arcade.SpriteList()
+        self.npc_list = arcade.SpriteList()
         
-        self.wall1 = arcade.Sprite("BR.png",0.08)
-        self.wall1.center_x = 85
-        self.wall1.center_y = 10
-        self.wall1.angle = 0
-        self.wall_list.append(self.wall1)
-        
-        self.wall2 = arcade.Sprite("BR.png",0.08)
-        self.wall2.center_x = 85
-        self.wall2.center_y = 225
-        self.wall2.angle = 0
-        self.wall_list.append(self.wall2)
-        
-        self.wall2 = arcade.Sprite("BR.png",0.08)
-        self.wall2.center_x = 320
-        self.wall2.center_y = 225
-        self.wall2.angle = 0
-        self.wall_list.append(self.wall2)        
-        
-        self.wall3 = arcade.Sprite("BR.png",0.08)
-        self.wall3.center_x = 10
-        self.wall3.center_y = 50
-        self.wall3.angle = 90
-        self.wall_list.append(self.wall3)   
-        
-        self.wall3 = arcade.Sprite("BR.png",0.08)
-        self.wall3.center_x = 10
-        self.wall3.center_y = 175
-        self.wall3.angle = 90
-        self.wall_list.append(self.wall3)        
-        
-        self.wall4 = arcade.Sprite("BR.png",0.08)
-        self.wall4.center_x = 160
-        self.wall4.center_y = 50
-        self.wall4.angle = 90
-        self.wall_list.append(self.wall4) 
-        
-        self.wall4 = arcade.Sprite("BR.png",0.08)
-        self.wall4.center_x = 210
-        self.wall4.center_y = 125
-        self.wall4.angle = 0
-        self.wall_list.append(self.wall4) 
-        
-        self.wall2 = arcade.Sprite("BR.png",0.08)
-        self.wall2.center_x = 265
-        self.wall2.center_y = 175
-        self.wall2.angle = 90
-        self.wall_list.append(self.wall2)        
-        
-        wall_coord_list = [(135,300,90),(370,300,90),(320,350,0),(60,350,0),(10,425,90),(135,425,90),(10,525,90),(60,600,0),(180,600,0),(300,600,0),(375,540,90),(375,420,90)]
+        wall_coord_list = [(135,300,90),(370,300,90),(320,350,0),(60,350,0),(10,425,90),(135,425,90),(10,525,90),(60,600,0),(180,600,0),(300,600,0),(375,540,90),(375,420,90),(265,175,90),(210,125,0),(160,50,90),(10,175,90),(10,50,90),(320,225,0),(85,225,0),(85,10,0)]
         
         for coord in wall_coord_list:
-            wall = arcade.Sprite("BR.png",0.08)
-            wall.center_x = coord[0]
-            wall.center_y = coord[1]
+            wall = arcade.Sprite("BR.png",0.02)
+            wall.center_x = coord[0] // 4
+            wall.center_y = coord[1] // 4
             wall.angle = coord[2]
             self.wall_list.append(wall)            
 
-        self.npc1 = arcade.Sprite("circle.png",0.05)
-        self.npc1.center_x = 310
-        self.npc1.center_y = 285
+        self.npc1 = arcade.Sprite("circle.png",0.0125)
+        self.npc1.center_x = 330 // 4
+        self.npc1.center_y = 285 // 4
+        self.npc_list.append(self.npc1)
         
-        self.npc1_sprite = arcade.Sprite("Dragon.png",0.3)
+        self.npc1_sprite = arcade.Sprite("Dragon.png",0.075)
         self.npc1_sprite.center_y = SCREEN_HEIGHT//2
         self.npc1_sprite.center_x = -50
         
-        self.camera = arcade.Sprite("Triangle.png",0.01)
-        self.camera.center_x = 85
-        self.camera.center_y = 85
+        self.camera = arcade.Sprite("Triangle.png",0.0025)
+        self.camera.center_x = 85 // 4
+        self.camera.center_y = 85 // 4
         self.camera.angle = 0
         
         self.rayCast_list = arcade.SpriteList()
@@ -108,34 +62,52 @@ class MyGame(arcade.Window):
         self.S_pressed = False
         self.D_pressed = False
         
-        self.res = 5
         
-        self.raycast()
         self.AA = False
         self.npc1_location = []
         self.layer_list = []
         
+        """ quality settings """
+        self.ray_speed = 2 #basically achieves AA
+        self.res = 30      #steps in 800 range
+        self.thickness = 1/15
+        
+        
     def raycast(self):
         
-        for i in range(-45,45,self.res):
+        for i in range(-400,400,self.res):
             ray = arcade.Sprite("circle.png",0.005)
-            ray.angle = i + self.camera.angle - 90
+            ray.angle = i//10 + self.camera.angle - 90
             ray.center_x = self.camera.center_x
             ray.center_y = self.camera.center_y
             self.rayCast_list.append(ray)
             
+        while len(self.rayCast_list) > 0:
+            for ray in self.rayCast_list:
+                ray.center_x += math.cos(math.radians(ray.angle)) * self.ray_speed
+                ray.center_y += math.sin(math.radians(ray.angle)) * self.ray_speed
+                cast_hit_list = arcade.check_for_collision_with_list(ray,self.wall_list)
+                if len(cast_hit_list) != 0:
+                    draw_point = [ray.center_x,ray.center_y,math.sqrt((ray.center_x-self.camera.center_x) ** 2 + (ray.center_y-self.camera.center_y) ** 2),ray.angle,ray.angle,0]
+                    self.draw_point_list.append(draw_point)
+                    ray.kill()
+                npc_hit = arcade.check_for_collision(ray,self.npc1)
+                if npc_hit:
+                    npc_pos = SCREEN_WIDTH//6 + (self.camera.angle - ray.angle) * 7
+                    self.npc1_location.append(npc_pos)
+                    
+                        
+            
     def draw_3d(self):
         for draw_point in self.draw_point_list:
-            draw_point[3] = SCREEN_WIDTH//4 + (self.camera.angle - draw_point[4]) * 6
+            draw_point[3] = SCREEN_WIDTH//6 + (self.camera.angle - draw_point[4]) * 7
       
             draw_point[4] = int(200 - draw_point[2])
             
+            self.layer_list.append((draw_point[2],draw_point[3],SCREEN_HEIGHT//2,self.res * 1.2,5000 / draw_point[2],(draw_point[4] - 20,draw_point[4]-20,draw_point[4]-20)))
+             
+            #self.layer_list.append((draw_point[2],draw_point[3],SCREEN_HEIGHT//2,700/draw_point[2]*self.res*self.thickness,5000 / draw_point[2],(draw_point[4] - 20,draw_point[4]-20,draw_point[4]-20)))
             
-            #arcade.draw_rectangle_filled(draw_point[3],SCREEN_HEIGHT//2, 1500/draw_point[2]*self.res, 25000 / draw_point[2], (draw_point[4] + 10,draw_point[4]+10,draw_point[4]+10))
-            
-            self.layer_list.append((draw_point[2],draw_point[3],SCREEN_HEIGHT//2,1500/draw_point[2]*self.res,25000 / draw_point[2],(draw_point[4] + 10,draw_point[4]+10,draw_point[4]+10)))
-            
-            #arcade.draw_rectangle_filled(drawX,SCREEN_HEIGHT//2, 15, 30000 / draw_point[2], arcade.color.BLACK)
         
         AA_list = []
         if self.AA:
@@ -180,7 +152,9 @@ class MyGame(arcade.Window):
         self.npc1_sprite.center_x = -50
         if len(self.npc1_location) != 0:
             self.npc1_sprite.center_x = sum(self.npc1_location)/len(self.npc1_location)
-            self.npc1_sprite.draw()
+            
+            distance = math.sqrt((self.npc1.center_x-self.camera.center_x) ** 2 + (self.npc1.center_y-self.camera.center_y) ** 2) 
+            self.layer_list.append((distance,"npc"))
             self.npc1_location = []
     
         
@@ -192,19 +166,24 @@ class MyGame(arcade.Window):
         arcade.draw_rectangle_filled(850,210,600,200,arcade.color.BROWN)
         arcade.draw_rectangle_filled(850,390,600,180,arcade.color.DARK_BROWN)
         
-        #add the npc to the list, and give npc distance
-        #optimize
-        #basically works
+        self.npc_draw()
         
         self.layer_list.sort()
-        for i in range(len(self.layer_list)-1,0,-1):
-            arcade.draw_rectangle_filled(self.layer_list[i][1],self.layer_list[i][2],self.layer_list[i][3],self.layer_list[i][4],self.layer_list[i][5])
+        for i in range(len(self.layer_list)-1,-1,-1):
+            #print(self.layer_list[i][0],self.layer_list[i][1])
+            if self.layer_list[i][1] == "npc":
+                center_x = self.npc1_sprite.center_x
+                self.npc1_sprite = arcade.Sprite("Dragon.png",5/self.layer_list[i][0])
+                self.npc1_sprite.center_y = SCREEN_HEIGHT//2        
+                self.npc1_sprite.center_x = center_x
+                self.npc1_sprite.draw()
+                
+            else:
+                arcade.draw_rectangle_filled(self.layer_list[i][1],self.layer_list[i][2],self.layer_list[i][3],self.layer_list[i][4],self.layer_list[i][5])
         self.layer_list = []            
 
         self.draw_3d()
-        '''
-        self.npc_draw()
-        '''
+        
         self.npc1.draw()
         self.wall_list.draw()
         self.camera.draw()
@@ -222,52 +201,36 @@ class MyGame(arcade.Window):
         if time.time() - self.raycast_start > 0.01:
             self.raycast_start = time.time()
             self.raycast()
-        '''
-        if len(self.rayCast_list) == 0:
-            self.raycast_start = time.time()
-            
-            self.raycast()
-        '''    
-        for ray in self.rayCast_list:
-            ray.center_x += math.cos(math.radians(ray.angle)) * 10
-            ray.center_y += math.sin(math.radians(ray.angle)) * 10
-            cast_hit_list = arcade.check_for_collision_with_list(ray,self.wall_list)
-            if len(cast_hit_list) != 0:
-                draw_point = [ray.center_x,ray.center_y,math.sqrt((ray.center_x-self.camera.center_x) ** 2 + (ray.center_y-self.camera.center_y) ** 2),ray.angle,ray.angle,0]
-                self.draw_point_list.append(draw_point)
-                ray.kill()
-            npc_hit_list = arcade.check_for_collision(ray,self.npc1)
-            if npc_hit_list and math.sqrt((ray.center_x-self.camera.center_x) ** 2 + (ray.center_y-self.camera.center_y) ** 2) < 80:
-                npc_pos = SCREEN_WIDTH//4 + (self.camera.angle - ray.angle) * 6
-                self.npc1_location.append(npc_pos)
-        
         
         if self.W_pressed:
-            self.camera.change_y = math.sin(math.radians(self.camera.angle - 90)) * 2
-            self.camera.change_x = math.cos(math.radians(self.camera.angle - 90)) * 2
+            self.camera.change_y = math.sin(math.radians(self.camera.angle - 90)) * 1.5
+            self.camera.change_x = math.cos(math.radians(self.camera.angle - 90)) * 1.5
         if self.S_pressed:
-            self.camera.change_y = -math.sin(math.radians(self.camera.angle - 90)) * 2
-            self.camera.change_x = -math.cos(math.radians(self.camera.angle - 90)) * 2         
+            self.camera.change_y = -math.sin(math.radians(self.camera.angle - 90)) * 1.5
+            self.camera.change_x = -math.cos(math.radians(self.camera.angle - 90)) * 1.5      
         if self.A_pressed:
-            self.camera.change_y = math.sin(math.radians(self.camera.angle )) * 2
-            self.camera.change_x = math.cos(math.radians(self.camera.angle )) * 2
+            self.camera.change_y = math.sin(math.radians(self.camera.angle )) * 1.5
+            self.camera.change_x = math.cos(math.radians(self.camera.angle )) * 1.5
         if self.D_pressed:
-            self.camera.change_y = -math.sin(math.radians(self.camera.angle )) * 2
-            self.camera.change_x = -math.cos(math.radians(self.camera.angle )) * 2
+            self.camera.change_y = -math.sin(math.radians(self.camera.angle )) * 1.5
+            self.camera.change_x = -math.cos(math.radians(self.camera.angle )) * 1.5
+        
         
         self.camera.center_x += self.camera.change_x
-    
         wall_hit_list = arcade.check_for_collision_with_list(self.camera,self.wall_list)
-        if len(wall_hit_list) != 0:
+        npc_hit_list = arcade.check_for_collision_with_list(self.camera,self.npc_list)        
+        if len(wall_hit_list) != 0 or len(npc_hit_list) != 0:
             self.camera.center_x -= self.camera.change_x
         
         self.camera.center_y += self.camera.change_y
-        
         wall_hit_list = arcade.check_for_collision_with_list(self.camera,self.wall_list)
-        if len(wall_hit_list) != 0:
+        npc_hit_list = arcade.check_for_collision_with_list(self.camera,self.npc_list)     
+        print("wall hit",len(wall_hit_list))
+        print("npc hit list",len(npc_hit_list))
+        if len(wall_hit_list) != 0 or len(npc_hit_list) != 0:
             self.camera.center_y -= self.camera.change_y          
-            
-            
+        
+
     def on_key_press(self,key,modifiers):
 
         if key == arcade.key.A:
