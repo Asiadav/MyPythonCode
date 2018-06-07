@@ -4,17 +4,7 @@ import time
 
 
 SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 600
-
-
-class Sprite_3D(arcade.Sprite):
-    def __init__(self, x, y, image,scale):
-        super().__init__(image,scale)
-        self.center_x = x
-        self.center_y = y
-        
-        
-    
+SCREEN_HEIGHT = 600    
 
 class MyGame(arcade.Window):
     def __init__(self, width, height, title):
@@ -23,12 +13,16 @@ class MyGame(arcade.Window):
         self.set_mouse_visible(True)
         
         arcade.set_background_color(arcade.color.WHITE)
-        
+        self.camera = arcade.Sprite("Triangle.png",0.0025)
+        self.camera.center_x = 85 // 4
+        self.camera.center_y = 85 // 4
+        self.camera.angle = 0        
         
     def setup(self):
         
         self.wall_list = arcade.SpriteList()
         self.npc_list = arcade.SpriteList()
+        self.coin_list = arcade.SpriteList()
         
         wall_coord_list = [(135,300,90),(370,300,90),(320,350,0),(60,350,0),(10,425,90),(135,425,90),(10,525,90),(60,600,0),(300,600,0),(375,540,90),(265,175,90),(210,125,0),(160,50,90),(10,175,90),(10,50,90),(320,225,0),(85,225,0),(85,10,0),(445,350,0),(445,490,0),(635,420,90),(505,540,90),(565,610,0),(635,300,90),(585,230,0),(375,160,90),(510,174,90),(510,62,90),(434,8,0),(285,80,315),(346,16,135),(675,440,135),(695,610,180),(748,562,135),(714,336,90),(850,520,180),(920,470,90),(758,272,180),(918,348,90),(864,272,180),(112,668,90),(246,672,90),(184,856,180),(128,912,90),(58,728,180),(8,802,90),(8,920,90),(8,1004,90),(60,1076,0),(184,1078,0),(184,1074,0),(260,1020,90),(260,906,90),(332,852,0),(312,720,0),(442,816,135),(546,650,225),(592,750,90),(485,830,90),(590,874,90),(548,978,315),(462,986,225),(380,908,225)]
         
@@ -39,6 +33,23 @@ class MyGame(arcade.Window):
             wall.angle = coord[2]
             self.wall_list.append(wall)            
 
+
+
+        coin_coord_list = [(200,200),(300,200)]
+        
+        
+        for coord in coin_coord_list:
+            coin = arcade.Sprite("bitcoin.png",0.03)
+            coin.center_x = coord[0] // 4
+            coin.center_y = coord[1] // 4
+            coin.distance = self.findDist(coin)
+            coin.location_list = []
+            coin.projection = arcade.Sprite("bitcoin.png",0.1)
+            coin.projection.center_x = -50
+            coin.projection.center_y = SCREEN_HEIGHT//2
+            
+            self.coin_list.append(coin)
+        
         self.npc1 = arcade.Sprite("circle.png",0.0125)
         self.npc1.center_x = 330 // 4
         self.npc1.center_y = 285 // 4
@@ -55,10 +66,7 @@ class MyGame(arcade.Window):
         self.fireball = arcade.Sprite("fireball.png",0.003)
         
         
-        self.camera = arcade.Sprite("Triangle.png",0.0025)
-        self.camera.center_x = 85 // 4
-        self.camera.center_y = 85 // 4
-        self.camera.angle = 0
+
         
         self.rayCast_list = arcade.SpriteList()
         
@@ -119,6 +127,12 @@ class MyGame(arcade.Window):
                     fireball_pos = SCREEN_WIDTH//6 + (self.camera.angle - ray.angle) * 7
                     self.fireball_location.append(fireball_pos)
                     
+                coin_hit_list = arcade.check_for_collision_with_list(ray,self.coin_list)    
+                if len(coin_hit_list) != 0:
+                    for coin in coin_hit_list:
+                        coin_pos = SCREEN_WIDTH//6 + (self.camera.angle - ray.angle) * 7
+                        coin.location_list.append(coin_pos)
+                    
                 if math.sqrt((ray.center_x-self.camera.center_x) ** 2 + (ray.center_y-self.camera.center_y) ** 2) > self.render_distance:
                     ray.kill()
             
@@ -157,18 +171,21 @@ class MyGame(arcade.Window):
         self.camera.draw()
         self.rayCast_list.draw()   
         self.fireball.draw()
+        self.coin_list.draw()
         
         
         
     def findDist(self,sprite):
         
         sprite.distance = math.sqrt((sprite.center_x-self.camera.center_x) ** 2 + (sprite.center_y-self.camera.center_y) ** 2) 
+        #sprite.projection.scale = 10/sprite.distance
         return math.sqrt((sprite.center_x-self.camera.center_x) ** 2 + (sprite.center_y-self.camera.center_y) ** 2) 
  
     def find_x(self,sprite):
-        
-        sprite.projection.center_x = sum(sprite.location_list)/len(sprite.location_list)
-        return sum(sprite.location_list)/len(sprite.location_list)
+        if len(sprite.location_list) != 0:
+            sprite.projection.center_x = sum(sprite.location_list)/len(sprite.location_list)
+            return sum(sprite.location_list)/len(sprite.location_list)
+        sprite.location_list = []
         
     def layer_sort(self,sprite):
         
@@ -180,14 +197,36 @@ class MyGame(arcade.Window):
         for i in range(len(self.layer_list)-1,-1,-1):
             if self.layer_list[i][1] == "sprite":
                 self.layer_list[i][2].draw()
-            if self.layer_list[i][1] != "sprite":
+            if self.layer_list[i][1] != "sprite" and self.layer_list[i][1] != "fireball" and self.layer_list[i][1] != "npc":
                 "draw wall"
+                arcade.draw_texture_rectangle(self.layer_list[i][1],self.layer_list[i][2],self.layer_list[i][3],self.layer_list[i][4],self.wall)
             
+                #arcade.draw_rectangle_filled(self.layer_list[i][1],self.layer_list[i][2],self.layer_list[i][3],self.layer_list[i][4],(200.0000001,200,200,200))
+                color = 100 #int(self.layer_list[i][4])
+                alpha = int(self.layer_list[i][0]*2)
+            
+                arcade.draw_rectangle_filled(self.layer_list[i][1],self.layer_list[i][2],self.layer_list[i][3],self.layer_list[i][4],(color,color,color,alpha))
+                                             
+            if self.layer_list[i][1] == "npc":
+                center_x = self.npc1_sprite.center_x
+                self.npc1_sprite = arcade.Sprite("Dragon.png",5/self.layer_list[i][0])
+                self.npc1_sprite.center_y = SCREEN_HEIGHT//2        
+                self.npc1_sprite.center_x = center_x
+                self.npc1_sprite.draw()
+                
+            if self.layer_list[i][1] == "fireball":
+                center_x = self.fireball_sprite.center_x
+                self.fireball_sprite = arcade.Sprite("fireball.png",1/self.layer_list[i][0])
+                self.fireball_sprite.center_y = SCREEN_HEIGHT//2        
+                self.fireball_sprite.center_x = center_x
+                self.fireball_sprite.draw()            
     def sprite_2d_to_draw_3d(self,sprite):
         "take 2d sprites and make them 3d"
+        
         self.findDist(sprite)
         self.find_x(sprite)
         self.layer_sort(sprite)
+        self.draw_from_list()
         
         
         
@@ -200,6 +239,12 @@ class MyGame(arcade.Window):
         self.npc_draw()
         self.fireball_draw()
         
+        for sprite in self.coin_list:
+            self.sprite_2d_to_draw_3d(sprite)
+            sprite.location_list = []
+        
+        
+        '''
         self.layer_list.sort()
         for i in range(len(self.layer_list)-1,-1,-1):
             if self.layer_list[i][1] == "npc":
@@ -226,7 +271,7 @@ class MyGame(arcade.Window):
                 
                 arcade.draw_rectangle_filled(self.layer_list[i][1],self.layer_list[i][2],self.layer_list[i][3],self.layer_list[i][4],(color,color,color,alpha))
                 
-                
+        '''       
         self.layer_list = []            
 
         self.draw_3d()
@@ -298,8 +343,12 @@ class MyGame(arcade.Window):
         if len(wall_hit_list) != 0 or len(npc_hit_list) != 0:
             self.camera.center_y -= self.camera.change_y          
         
-        self.camera.angle += self.camera.change_angle
+        coin_hit_list = arcade.check_for_collision_with_list(self.camera,self.coin_list)     
+        if len(coin_hit_list) != 0:
+            for coin in coin_hit_list:
+                coin.kill()
         
+        self.camera.angle += self.camera.change_angle
         
         self.enemy_action()
         
@@ -309,11 +358,9 @@ class MyGame(arcade.Window):
         if key == arcade.key.A:
             self.A_pressed = True
  
-            
         if key == arcade.key.D:
             self.D_pressed = True    
 
-        
         if key == arcade.key.W:
             self.W_pressed = True
             
@@ -354,15 +401,8 @@ class MyGame(arcade.Window):
             
     def on_mouse_motion(self,x,y,dx,dy):
         
-        #self.rayCast_list = arcade.SpriteList()
         self.camera.angle -= dx / 2
-        '''
-        if self.camera.angle > 360:
-            self.camera.angle = 0
-        elif self.camera.angle < 0:
-            self.camera.angle = 360
-        '''
-        #self.camera.angle = math.degrees(math.atan2((self.camera.center_y - y),(self.camera.center_x - x))) -90          
+      
         
 def main():
     window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, "3D Test")
