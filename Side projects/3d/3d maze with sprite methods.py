@@ -23,11 +23,11 @@ class MyGame(arcade.Window):
         self.camera.angle = 0     
         
         
-        coin_coord_list = [(200,200),(300,200)]
+        coin_coord_list = [(-100,-100),(200,200),(325,150)]
         
         
         for coord in coin_coord_list:
-            coin = arcade.Sprite("bitcoin.png",0.03)
+            coin = arcade.Sprite("bitcoin.png",0.015)
             coin.center_x = coord[0] // 4
             coin.center_y = coord[1] // 4
             coin.distance = math.sqrt((coin.center_x-self.camera.center_x) ** 2 + (coin.center_y-self.camera.center_y) ** 2)
@@ -54,9 +54,6 @@ class MyGame(arcade.Window):
             wall.angle = coord[2]
             self.wall_list.append(wall)            
 
-
-
-
         self.npc1 = arcade.Sprite("circle.png",0.0125)
         self.npc1.center_x = 330 // 4
         self.npc1.center_y = 285 // 4
@@ -71,8 +68,6 @@ class MyGame(arcade.Window):
         self.fireball_sprite.center_x = -50        
         
         self.fireball = arcade.Sprite("fireball.png",0.003)
-        
-        
 
         
         self.rayCast_list = arcade.SpriteList()
@@ -315,8 +310,8 @@ class MyGame(arcade.Window):
             self.fireball.center_y = self.npc1.center_y
             self.fireball_list.append(self.fireball)
         for fireball in self.fireball_list:
-            fireball.center_x += math.cos(math.radians(fireball.angle)) * 2
-            fireball.center_y += math.sin(math.radians(fireball.angle)) * 2
+            fireball.center_x += math.cos(math.radians(fireball.angle)) * 3
+            fireball.center_y += math.sin(math.radians(fireball.angle)) * 3
             
             shoot_hit_list = arcade.check_for_collision_with_list(fireball,self.wall_list)
             if len(shoot_hit_list) != 0:
