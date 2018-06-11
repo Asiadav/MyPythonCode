@@ -12,17 +12,38 @@ class MyGame(arcade.Window):
         
         self.set_mouse_visible(True)
         
+        self.wall_list = arcade.SpriteList()
+        self.npc_list = arcade.SpriteList()
+        self.coin_list = arcade.SpriteList()        
+        
         arcade.set_background_color(arcade.color.WHITE)
         self.camera = arcade.Sprite("Triangle.png",0.0025)
         self.camera.center_x = 85 // 4
         self.camera.center_y = 85 // 4
-        self.camera.angle = 0        
+        self.camera.angle = 0     
+        
+        
+        coin_coord_list = [(200,200),(300,200)]
+        
+        
+        for coord in coin_coord_list:
+            coin = arcade.Sprite("bitcoin.png",0.03)
+            coin.center_x = coord[0] // 4
+            coin.center_y = coord[1] // 4
+            coin.distance = math.sqrt((coin.center_x-self.camera.center_x) ** 2 + (coin.center_y-self.camera.center_y) ** 2)
+            coin.location_list = []
+            coin.projection = arcade.Sprite("bitcoin.png",0.1)
+            coin.projection.center_x = -50
+            coin.projection.center_y = SCREEN_HEIGHT//2
+            coin.projection.scale = 0.1
+            
+            self.coin_list.append(coin)
+                
+        
         
     def setup(self):
         
-        self.wall_list = arcade.SpriteList()
-        self.npc_list = arcade.SpriteList()
-        self.coin_list = arcade.SpriteList()
+ 
         
         wall_coord_list = [(135,300,90),(370,300,90),(320,350,0),(60,350,0),(10,425,90),(135,425,90),(10,525,90),(60,600,0),(300,600,0),(375,540,90),(265,175,90),(210,125,0),(160,50,90),(10,175,90),(10,50,90),(320,225,0),(85,225,0),(85,10,0),(445,350,0),(445,490,0),(635,420,90),(505,540,90),(565,610,0),(635,300,90),(585,230,0),(375,160,90),(510,174,90),(510,62,90),(434,8,0),(285,80,315),(346,16,135),(675,440,135),(695,610,180),(748,562,135),(714,336,90),(850,520,180),(920,470,90),(758,272,180),(918,348,90),(864,272,180),(112,668,90),(246,672,90),(184,856,180),(128,912,90),(58,728,180),(8,802,90),(8,920,90),(8,1004,90),(60,1076,0),(184,1078,0),(184,1074,0),(260,1020,90),(260,906,90),(332,852,0),(312,720,0),(442,816,135),(546,650,225),(592,750,90),(485,830,90),(590,874,90),(548,978,315),(462,986,225),(380,908,225)]
         
@@ -35,21 +56,7 @@ class MyGame(arcade.Window):
 
 
 
-        coin_coord_list = [(200,200),(300,200)]
-        
-        
-        for coord in coin_coord_list:
-            coin = arcade.Sprite("bitcoin.png",0.03)
-            coin.center_x = coord[0] // 4
-            coin.center_y = coord[1] // 4
-            coin.distance = self.findDist(coin)
-            coin.location_list = []
-            coin.projection = arcade.Sprite("bitcoin.png",0.1)
-            coin.projection.center_x = -50
-            coin.projection.center_y = SCREEN_HEIGHT//2
-            
-            self.coin_list.append(coin)
-        
+
         self.npc1 = arcade.Sprite("circle.png",0.0125)
         self.npc1.center_x = 330 // 4
         self.npc1.center_y = 285 // 4
@@ -175,13 +182,26 @@ class MyGame(arcade.Window):
         
         
         
-    def findDist(self,sprite):
+    def find_dist(self,sprite):
         
         sprite.distance = math.sqrt((sprite.center_x-self.camera.center_x) ** 2 + (sprite.center_y-self.camera.center_y) ** 2) 
-        #sprite.projection.scale = 10/sprite.distance
+        x = sprite.projection.center_x
+        y = sprite.projection.center_y
+
+        sprite.projection = arcade.Sprite("bitcoin.png", 4 / sprite.distance)
+        sprite.projection.center_x = x
+        sprite.projection.center_y = y - 10 / sprite.distance
+        
+       
+
         return math.sqrt((sprite.center_x-self.camera.center_x) ** 2 + (sprite.center_y-self.camera.center_y) ** 2) 
- 
+        
     def find_x(self,sprite):
+        '''
+        sprite.distance = math.sqrt((sprite.center_x-self.camera.center_x) ** 2 + (sprite.center_y-self.camera.center_y) ** 2) 
+        sprite.projection.scale = 10 / sprite.distance
+        '''
+        
         if len(sprite.location_list) != 0:
             sprite.projection.center_x = sum(sprite.location_list)/len(sprite.location_list)
             return sum(sprite.location_list)/len(sprite.location_list)
@@ -219,11 +239,12 @@ class MyGame(arcade.Window):
                 self.fireball_sprite = arcade.Sprite("fireball.png",1/self.layer_list[i][0])
                 self.fireball_sprite.center_y = SCREEN_HEIGHT//2        
                 self.fireball_sprite.center_x = center_x
-                self.fireball_sprite.draw()            
-    def sprite_2d_to_draw_3d(self,sprite):
+                self.fireball_sprite.draw()
+                
+    def sprite_2d_to_draw_3d(self, sprite: arcade.Sprite):
         "take 2d sprites and make them 3d"
         
-        self.findDist(sprite)
+        self.find_dist(sprite)
         self.find_x(sprite)
         self.layer_sort(sprite)
         self.draw_from_list()
