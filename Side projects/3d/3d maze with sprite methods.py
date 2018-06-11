@@ -23,7 +23,7 @@ class MyGame(arcade.Window):
         self.camera.angle = 0     
         
         
-        coin_coord_list = [(-100,-100),(200,200),(325,150)]
+        coin_coord_list = [(-100, -100), (324, 148), (64, 408),(44, 768), (208, 904), (448, 856), (500, 968) , (876, 328), (872, 480), (416, 516), (280, 676), (536, 576)]
         
         
         for coord in coin_coord_list:
@@ -95,8 +95,8 @@ class MyGame(arcade.Window):
         self.wall = arcade.load_texture("brick_wall.jpg")
         
         """ quality settings """
-        self.ray_speed = 4 #basically achieves AA
-        self.res = 40      #steps in 800 range
+        self.ray_speed = 5 #basically achieves AA
+        self.res = 60      #steps in 800 range
         self.thickness = 1/15
         
         self.npc_attack_start = 0
@@ -129,9 +129,9 @@ class MyGame(arcade.Window):
                     fireball_pos = SCREEN_WIDTH//6 + (self.camera.angle - ray.angle) * 7
                     self.fireball_location.append(fireball_pos)
                     
-                coin_hit_list = arcade.check_for_collision_with_list(ray,self.coin_list)    
-                if len(coin_hit_list) != 0:
-                    for coin in coin_hit_list:
+                self.coin_hit_list = arcade.check_for_collision_with_list(ray,self.coin_list)    
+                if len(self.coin_hit_list) != 0:
+                    for coin in self.coin_hit_list:
                         coin_pos = SCREEN_WIDTH//6 + (self.camera.angle - ray.angle) * 7
                         coin.location_list.append(coin_pos)
                     
@@ -181,11 +181,10 @@ class MyGame(arcade.Window):
         
         sprite.distance = math.sqrt((sprite.center_x-self.camera.center_x) ** 2 + (sprite.center_y-self.camera.center_y) ** 2) 
         x = sprite.projection.center_x
-        y = sprite.projection.center_y
 
         sprite.projection = arcade.Sprite("bitcoin.png", 4 / sprite.distance)
         sprite.projection.center_x = x
-        sprite.projection.center_y = y - 10 / sprite.distance
+        sprite.projection.center_y = SCREEN_HEIGHT//2 - 10 / sprite.distance
         
        
 
@@ -255,9 +254,14 @@ class MyGame(arcade.Window):
         self.npc_draw()
         self.fireball_draw()
         
+        
         for sprite in self.coin_list:
-            self.sprite_2d_to_draw_3d(sprite)
-            sprite.location_list = []
+            if len(sprite.location_list) != 0:
+                self.sprite_2d_to_draw_3d(sprite)
+                sprite.location_list = []
+            else:
+                self.layer_list.sort()
+                self.draw_from_list()
         
         
         '''

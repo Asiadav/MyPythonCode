@@ -30,8 +30,7 @@ class MyGame(arcade.Window):
         self.npc_list = arcade.SpriteList()
         self.coin_list = arcade.SpriteList()
         
-        coin_coord_list = [(200,200),(325,150)]
-        
+        coin_coord_list = [(-100, -100), (200, 200), (324, 148), (64, 408), (332, 560), (44, 768), (208, 904), (448, 856), (500, 968), (760, 324), (876, 328), (872, 480), (392, 312), (416, 516), (280, 676), (536, 576), (448, 692)]       
         
         for coord in coin_coord_list:
             coin = arcade.Sprite("bitcoin.png",0.015)
@@ -83,8 +82,8 @@ class MyGame(arcade.Window):
         self.res = 30      #steps in 800 range
         self.thickness = 1/15
         
-
-        self.new_wall = arcade.Sprite("BR.png",0.02)
+        
+        self.new_wall = arcade.Sprite("bitcoin.png",0.015)
         self.new_wall.center_x = 375//4
         self.new_wall.center_y = 540//4
         self.new_wall.angle = 90
@@ -103,6 +102,7 @@ class MyGame(arcade.Window):
         self.wall_list.draw()
         self.camera.draw()
         self.new_wall.draw()
+        self.coin_list.draw()
         
                 
         arcade.draw_rectangle_outline(850,300,600,380,arcade.color.GRAY, 100)
@@ -111,7 +111,12 @@ class MyGame(arcade.Window):
         
     def update(self,dt):
         "update" 
-        print(self.x,self.y,self.new_wall.angle)
+        E = []
+        for coin in self.coin_list:
+            E.append((coin.center_x * 4,coin.center_y * 4))
+        
+        print(E)
+        print(len(self.coin_list))
         
 
     def on_key_press(self,key,modifiers):
@@ -138,22 +143,29 @@ class MyGame(arcade.Window):
             self.new_wall.angle += 45
             if self.new_wall.angle>360:
                 self.new_wall.angle = 0
+                
+        if key == arcade.key.ENTER:
+            
+            coin = arcade.Sprite("bitcoin.png",0.015)
+            coin.center_x = self.new_wall.center_x
+            coin.center_y = self.new_wall.center_y
+            self.coin_list.append(coin)
             
     def on_key_release(self,key,modifiers):
         
         if key == arcade.key.W:
             self.W_pressed = False
  
-            
         if key == arcade.key.A:
             self.A_pressed = False
 
         if key == arcade.key.S:
             self.S_pressed = False
 
-            
         if key == arcade.key.D:
             self.D_pressed = False
+            
+
             
     def on_mouse_press(self, x, y, button, modifiers):
         self.new_wall.center_x = x
