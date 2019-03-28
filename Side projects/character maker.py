@@ -1,3 +1,4 @@
+4
 import random
 
 def character():    #creates a character
